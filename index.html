@@ -1,0 +1,1235 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>El cuento en Piglia</title>
+<meta name="description" content="Presentación interactiva sobre las tesis de Ricardo Piglia sobre el cuento: las dos historias, la historia secreta y el final.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..800;1,6..96,400..800&family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Schibsted+Grotesk:wght@400..700&display=swap">
+<style>
+/* Lámina fija de 1920×1080 escalada al visor. Dos tintas de risógrafo sobre papel:
+   azul = historia 1 (la visible), escarlata = historia 2 (la secreta), ciruela = donde se cruzan.
+   El modo «reverso» (tecla S) da vuelta la hoja: fondo de noche y aparece la historia secreta. */
+:root {
+  --paper: #ECEAE3;
+  --paper-2: #E2DED2;
+  --ink: #1D2340;
+  --muted: #565565;
+  --blue: #2F4DA0;
+  --scarlet: #E2483D;
+  --scarlet-text: #B7302A;
+  --plum: #5A2A55;
+  --yellow: #F2C230;
+  --night: #141832;
+  --night-2: #1F2447;
+  --letterbox: #0D1020;
+
+  --bg: var(--paper);
+  --fg: var(--ink);
+  --h1: var(--blue);
+  --h2: var(--scarlet-text);
+  --h2-ink: var(--scarlet);
+  --cross: var(--plum);
+  --rule: rgba(29, 35, 64, .16);
+  --card: #F4F2EC;
+
+  --f-display: "Bodoni Moda", "Bodoni 72", Didot, Georgia, serif;
+  --f-body: "Schibsted Grotesk", "Helvetica Neue", Arial, sans-serif;
+  --f-mono: "Courier Prime", "Courier New", Courier, monospace;
+  color-scheme: light;
+}
+.stage.reverso {
+  --bg: var(--night);
+  --fg: #ECEAE3;
+  --muted: #AFAEC4;
+  --h1: #92A9EC;
+  --h2: #FF7468;
+  --h2-ink: #FF6A5C;
+  --cross: #C98BC2;
+  --rule: rgba(236, 234, 227, .2);
+  --card: var(--night-2);
+}
+
+[hidden] { display: none !important; }
+html, body { height: 100%; }
+body { margin: 0; background: var(--letterbox); color: var(--fg); overflow: hidden; font-family: var(--f-body); }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+.stage {
+  position: fixed; left: 50%; top: 50%; width: 1920px; height: 1080px;
+  transform: translate(-50%, -50%) scale(var(--s, .5));
+  background: var(--bg); color: var(--fg); overflow: hidden;
+  transition: background-color .6s ease, color .6s ease;
+}
+/* grano de papel */
+.stage::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 30; opacity: .32; mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .11  0 0 0 0 .13  0 0 0 0 .25  0 0 0 .09 0'/></filter><rect width='240' height='240' filter='url(%23n)'/></svg>");
+}
+.stage.reverso::after { mix-blend-mode: screen; opacity: .18; }
+
+/* ---------- láminas ---------- */
+.slide {
+  position: absolute; inset: 0; padding: 104px 120px 140px;
+  opacity: 0; visibility: hidden; transform: translateY(14px);
+  transition: opacity .55s ease, transform .55s ease, visibility 0s linear .55s;
+}
+.slide.on { opacity: 1; visibility: visible; transform: none; transition: opacity .55s ease, transform .55s ease, visibility 0s; }
+.cols { display: grid; gap: 72px; height: 100%; align-items: center; }
+.col { display: flex; flex-direction: column; gap: 28px; min-width: 0; }
+
+.eyebrow { font: 700 20px/1.2 var(--f-mono); letter-spacing: .16em; text-transform: uppercase; color: var(--h1); display: flex; gap: 14px; align-items: center; margin: 0; }
+.eyebrow::before { content: ""; width: 34px; height: 3px; background: var(--h1); }
+.title { font: 500 64px/1.06 var(--f-display); letter-spacing: -.012em; margin: 0; text-wrap: balance; font-variation-settings: "opsz" 96; }
+.title.xl { font-size: 92px; }
+.title em, .h2t { font-style: italic; color: var(--h2); }
+.lead { font: 400 34px/1.34 var(--f-body); margin: 0; text-wrap: pretty; }
+.body { font: 400 27px/1.46 var(--f-body); margin: 0; max-width: 32em; text-wrap: pretty; }
+.body b, .lead b { font-weight: 650; }
+.small { font: 400 22px/1.42 var(--f-body); color: var(--muted); margin: 0; text-wrap: pretty; }
+.mono { font-family: var(--f-mono); }
+.cite { font: 400 20px/1.4 var(--f-mono); color: var(--muted); margin: 0; }
+.k1 { color: var(--h1); font-weight: 650; }
+.k2 { color: var(--h2); font-weight: 650; }
+.kx { color: var(--cross); font-weight: 650; }
+.media { position: relative; border-radius: 4px; overflow: hidden; background: var(--paper-2); box-shadow: 0 1px 0 var(--rule), 0 18px 40px -26px rgba(13, 16, 32, .5); }
+.media video, .media img { display: block; width: 100%; height: 100%; object-fit: cover; }
+
+/* botones */
+.btn {
+  font: 700 19px/1 var(--f-mono); letter-spacing: .06em; text-transform: uppercase;
+  color: var(--fg); background: transparent; border: 2px solid var(--rule); border-radius: 999px;
+  padding: 14px 22px; cursor: pointer; transition: background-color .2s, color .2s, border-color .2s;
+}
+.btn:hover { border-color: var(--fg); }
+.btn[aria-pressed="true"], .btn.on { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+.btn.b1[aria-pressed="true"] { background: var(--h1); border-color: var(--h1); color: #fff; }
+.btn.b2[aria-pressed="true"] { background: var(--h2-ink); border-color: var(--h2-ink); color: #fff; }
+.btn:focus-visible, button:focus-visible, input:focus-visible, [tabindex]:focus-visible { outline: 3px solid var(--h1); outline-offset: 3px; }
+.row { display: flex; gap: 14px; flex-wrap: wrap; align-items: center; }
+
+/* barra de punto de vista (dos historias) */
+.scrubber { display: grid; grid-template-columns: auto 1fr auto; gap: 18px; align-items: center; font: 700 18px/1 var(--f-mono); letter-spacing: .08em; text-transform: uppercase; }
+.scrubber .l { color: var(--h1); } .scrubber .r { color: var(--h2); }
+input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; height: 34px; background: transparent; cursor: pointer; }
+input[type=range]::-webkit-slider-runnable-track { height: 6px; border-radius: 3px; background: linear-gradient(90deg, var(--h1), var(--cross) 50%, var(--h2-ink)); }
+input[type=range]::-moz-range-track { height: 6px; border-radius: 3px; background: linear-gradient(90deg, var(--h1), var(--cross) 50%, var(--h2-ink)); }
+input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 28px; height: 28px; margin-top: -11px; border-radius: 50%; background: var(--bg); border: 4px solid var(--fg); }
+input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border-radius: 50%; background: var(--bg); border: 4px solid var(--fg); }
+
+/* historia secreta de la presentación */
+.nota {
+  position: absolute; z-index: 12; margin: 0; padding-left: 22px; border-left: 3px solid var(--h2-ink);
+  font: italic 400 24px/1.38 var(--f-mono); color: var(--h2);
+  opacity: 0; transform: translateY(8px); transition: opacity .6s ease .15s, transform .6s ease .15s; pointer-events: none;
+}
+.nota::before { content: "historia 2 ·"; display: block; font: 700 16px/1.6 var(--f-mono); letter-spacing: .18em; text-transform: uppercase; font-style: normal; }
+.reverso .nota { opacity: 1; transform: none; }
+.veil { position: absolute; inset: 0; background: var(--night); opacity: 0; transition: opacity .6s ease; pointer-events: none; z-index: 5; }
+.reverso .veil { opacity: .7; }
+
+/* ---------- pie ---------- */
+.foot {
+  position: absolute; left: 0; right: 0; bottom: 0; height: 104px; padding: 0 120px; z-index: 40;
+  display: grid; grid-template-columns: 1fr 460px 1fr; align-items: center; gap: 32px;
+  font: 400 19px/1.2 var(--f-mono); color: var(--muted);
+}
+.foot .src { white-space: nowrap; }
+.stage[data-foot="min"] .foot .src { visibility: hidden; }
+.stage[data-tone="night"] .foot { --fg: #ECEAE3; --muted: #AFAEC4; --rule: rgba(236, 234, 227, .26); color: var(--muted); }
+.prog { position: relative; height: 14px; }
+.prog i { position: absolute; left: 0; height: 3px; border-radius: 2px; transition: width .5s ease, opacity .5s ease; }
+.prog .p0 { top: 2px; width: 100%; background: var(--rule); }
+.prog .p1 { top: 2px; background: var(--h1); }
+.prog .p2 { top: 10px; background: repeating-linear-gradient(90deg, var(--h2-ink) 0 10px, transparent 10px 16px); opacity: .0; }
+.reverso .prog .p2 { opacity: 1; }
+.nav { display: flex; justify-content: flex-end; align-items: center; gap: 12px; }
+.frag { font: italic 400 21px/1 var(--f-mono); color: var(--h2); white-space: nowrap; display: none; }
+.frag::before { content: "historia 2 · fragmento "; font-style: normal; letter-spacing: .06em; }
+.reverso .frag { display: inline; }
+.reverso .foot .src { display: none; }
+.stage[data-tone="image"] .nav { background: rgba(236, 234, 227, .9); border-radius: 999px; padding: 6px 8px; margin-right: -8px; }
+.stage.reverso[data-tone="image"] .nav { background: rgba(20, 24, 50, .85); }
+.count { font-variant-numeric: tabular-nums; color: var(--fg); min-width: 92px; text-align: center; cursor: pointer; }
+.ic { width: 48px; height: 48px; border-radius: 50%; border: 2px solid var(--rule); background: transparent; color: var(--fg); display: grid; place-items: center; cursor: pointer; padding: 0; transition: border-color .2s, background-color .2s, color .2s; }
+.ic:hover { border-color: var(--fg); }
+.ic svg { width: 22px; height: 22px; }
+.ic.sec[aria-pressed="true"] { background: var(--h2-ink); border-color: var(--h2-ink); color: #fff; }
+.stage[data-tone="image"]:not(.reverso) .foot { color: var(--ink); }
+
+/* ---------- diseño de pliego (Affinity) ---------- */
+/* marcas de registro, plegado y barra de color sobre cada lámina */
+.stage::before { content: ""; position: absolute; inset: 0; z-index: 35; pointer-events: none; background: url(assets/pliego2.png) center / 100% 100% no-repeat; }
+.stage.reverso::before { filter: invert(1) hue-rotate(180deg); opacity: .5; }
+/* marco de ventana: filete a dos tintas y marcas de corte alineadas con la imagen */
+.media { overflow: visible; }
+.media::after { content: ""; position: absolute; inset: -30px; border: 30px solid transparent; border-image: url(assets/marco.png) 60 / 30px stretch; pointer-events: none; z-index: 6; }
+.reverso .media::after { filter: invert(1) hue-rotate(180deg); opacity: .7; }
+.portadilla { padding: 0; }
+.portadilla > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+
+/* ---------- 1 · portada ---------- */
+#portada { padding: 0; }
+#portada .bleed { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+
+/* ---------- 2 · la escena del casino ---------- */
+.anec { font: italic 400 50px/1.2 var(--f-display); margin: 0; text-wrap: balance; }
+.anec .j { color: var(--h1); }
+.anec .s { color: var(--h2); }
+.lens { width: 1100px; height: 614px; cursor: crosshair; touch-action: none; }
+.lens img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.lens .h2 { -webkit-mask-image: radial-gradient(circle var(--lr, 120px) at var(--lx, 78%) var(--ly, 31%), #000 94%, transparent 100%); mask-image: radial-gradient(circle var(--lr, 120px) at var(--lx, 78%) var(--ly, 31%), #000 94%, transparent 100%); }
+.lens.full .h2 { -webkit-mask-image: none; mask-image: none; }
+.lens .ring { position: absolute; z-index: 5; width: calc(var(--lr, 120px) * 2); height: calc(var(--lr, 120px) * 2); left: calc(var(--lx, 78%) - var(--lr, 120px)); top: calc(var(--ly, 31%) - var(--lr, 120px)); border-radius: 50%; border: 4px solid var(--scarlet); box-shadow: 0 0 0 7px rgba(236, 234, 227, .7), 0 14px 34px rgba(13, 16, 32, .35); pointer-events: none; transition: opacity .3s; }
+.lens.full .ring { opacity: 0; }
+.split { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; }
+.split > div { border-top: 4px solid var(--h1); padding-top: 14px; display: flex; flex-direction: column; gap: 8px; }
+.split > div + div { border-top-color: var(--h2-ink); }
+.split .tag { font: 700 18px/1.2 var(--f-mono); letter-spacing: .14em; text-transform: uppercase; }
+.split p { margin: 0; font: 400 25px/1.4 var(--f-body); }
+
+/* ---------- 5 · tarjetas ---------- */
+.cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 36px; }
+.flip { display: block; width: 100%; perspective: 1600px; height: 660px; cursor: pointer; border: 0; padding: 0; background: none; text-align: left; color: inherit; font: inherit; }
+.flip .in { display: block; position: relative; width: 100%; height: 100%; transform-style: preserve-3d; transition: transform .8s cubic-bezier(.3, .7, .2, 1); }
+.flip[aria-pressed="true"] .in { transform: rotateY(180deg); }
+.face { position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; border-radius: 6px; display: flex; flex-direction: column; overflow: hidden; }
+.face.front { background: var(--card); border: 2px solid var(--rule); }
+.face.back { background: var(--night); color: #ECEAE3; transform: rotateY(180deg); border: 2px solid var(--night); }
+/* ventana de la tarjeta: lámina 4:3 con margen de papel y filete, igual en las tres */
+.face .plate { display: block; flex: none; position: relative; margin: 16px 16px 0; aspect-ratio: 4 / 3; background: #F6F3EA; border: 1px solid rgba(29, 35, 64, .32); box-shadow: inset 0 0 0 5px #F6F3EA, inset 0 0 0 6px rgba(29, 35, 64, .14); }
+.face.back .plate { border-color: rgba(236, 234, 227, .35); }
+.face .cimg { display: block; position: absolute; inset: 9px; width: calc(100% - 18px); height: calc(100% - 18px); object-fit: cover; }
+.face .ct { display: flex; flex-direction: column; gap: 8px; padding: 18px 26px 22px; flex: 1; }
+.face .tag { display: block; font: 700 17px/1 var(--f-mono); letter-spacing: .16em; text-transform: uppercase; }
+.face.front .tag { color: var(--h1); }
+.face.back .tag { color: #FF7468; }
+.face h3 { display: block; font: italic 500 40px/1.05 var(--f-display); margin: 0; }
+.face .where { display: block; font: 400 19px/1.3 var(--f-mono); color: var(--muted); }
+.face.back .where { color: #AFAEC4; }
+.face .t { display: block; font: 400 22px/1.4 var(--f-body); margin-top: auto; }
+
+/* ---------- 6 · la clave (rejilla de Cardano) ---------- */
+.desk { width: 1180px; height: 660px; }
+.desk > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.page { position: absolute; left: 44px; top: 132px; z-index: 2; padding: 22px 26px 26px; background: #F6F3EA; color: #2F4DA0; font: 400 19px/1.6 "Courier Prime", "Courier New", monospace; box-shadow: 0 1px 0 rgba(29, 35, 64, .2), 0 22px 30px -16px rgba(13, 16, 32, .5); }
+.page .ph { display: block; font: italic 400 21px/1.2 var(--f-display); text-align: center; margin-bottom: 12px; color: #1D2340; }
+.page .ln { display: block; white-space: pre; }
+.page .sec { transition: color .4s ease; }
+.desk.aligned .page .sec { color: #B7302A; font-weight: 700; }
+.grille { position: absolute; left: 44px; top: 132px; z-index: 3; cursor: grab; touch-action: none; transform-origin: 50% 50%; filter: drop-shadow(0 14px 14px rgba(13, 16, 32, .35)); }
+.grille:active { cursor: grabbing; }
+.grille svg { display: block; }
+.decoded { margin: 0; min-height: 150px; display: flex; flex-direction: column; gap: 12px; }
+.decoded .msg { font: italic 400 34px/1.25 var(--f-display); color: var(--h2); margin: 0; }
+.decoded .why { font: 400 22px/1.4 var(--f-body); color: var(--muted); margin: 0; }
+
+/* ---------- 7 · iceberg ---------- */
+.ice { width: 1080px; height: 603px; }
+.ice .under { position: absolute; left: 0; right: 0; top: 35.5%; bottom: 0; background: var(--paper); opacity: calc(.86 - var(--r, 0) * .86); transition: opacity .15s linear; }
+.ice .lab { position: absolute; font: 700 19px/1.25 var(--f-mono); letter-spacing: .1em; text-transform: uppercase; padding: 8px 12px; background: rgba(236, 234, 227, .9); }
+.ice .lab.a { left: 24px; top: 26.5%; color: var(--blue); }
+.ice .lab.b { left: 24px; bottom: 24px; color: var(--scarlet-text); opacity: calc(.25 + var(--r, 0) * .75); }
+
+/* ---------- 8 · variantes ---------- */
+.tabs { display: flex; gap: 12px; }
+.var { display: grid; grid-template-columns: 540px 1fr; gap: 64px; align-items: center; }
+.var .who { font: italic 500 60px/1.05 var(--f-display); margin: 0; }
+.var .tagv { font: 700 19px/1 var(--f-mono); letter-spacing: .16em; text-transform: uppercase; color: var(--h2); margin: 0; }
+.var .legend { display: flex; gap: 28px; font: 400 19px/1.2 var(--f-mono); }
+#vImg { transition: opacity .25s ease; }
+
+/* ---------- 9 · Borges, mapa ---------- */
+.mapbox { width: 720px; height: 720px; }
+.mapbox img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: filter .8s ease; }
+.mapbox.secret img { filter: saturate(.55) brightness(1.05); }
+.mapov { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 3; }
+.mapov text { font-family: var(--f-mono); font-size: 30px; fill: #1D2340; }
+.mapov text.num { font-weight: 700; fill: #ECEAE3; font-size: 22px; }
+.mapov .cart { fill: rgba(236, 234, 227, .94); stroke: rgba(29, 35, 64, .35); stroke-width: 1.5; }
+.mapov .g { transition: opacity .6s ease; }
+.mapov .tri, .mapov .rhomb { fill: none; stroke-width: 6; stroke-linejoin: round; stroke-linecap: round; }
+.mapov .arc { fill: none; stroke: #E2483D; stroke-width: 3.5; stroke-dasharray: 205; }
+.map-cap { font: 400 24px/1.4 var(--f-body); margin: 0; min-height: 68px; max-width: 720px; text-wrap: pretty; }
+.who-list { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 28px; margin: 0; padding: 0; list-style: none; }
+.who-list li { border-top: 2px solid var(--rule); padding-top: 10px; font: 600 23px/1.25 var(--f-body); }
+.who-list li span { display: block; font: italic 400 20px/1.3 var(--f-display); color: var(--muted); }
+
+/* ---------- 10 · el cuarto oscuro ---------- */
+.reveal { width: 1080px; height: 603px; }
+.reveal img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.reveal .dev { opacity: var(--d, 0); }
+
+/* ---------- 12 · oyentes ---------- */
+.acc { display: flex; flex-direction: column; }
+.acc button { all: unset; box-sizing: border-box; cursor: pointer; display: grid; grid-template-columns: 1fr auto; gap: 6px 20px; border-top: 2px solid var(--rule); padding: 16px 0; width: 100%; }
+.acc button:focus-visible { outline: 3px solid var(--h1); outline-offset: 2px; }
+.acc .nm { font: 600 27px/1.2 var(--f-body); }
+.acc .nm span { font: italic 400 22px/1.2 var(--f-display); color: var(--muted); margin-left: 10px; }
+.acc .pl { font: 700 24px/1 var(--f-mono); color: var(--h2); transition: transform .3s; }
+.acc button[aria-expanded="true"] .pl { transform: rotate(45deg); }
+.acc .det { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; overflow: hidden; max-height: 0; transition: max-height .45s ease, padding .45s ease; }
+.acc button[aria-expanded="true"] + .det { max-height: 220px; padding-bottom: 14px; }
+.acc .det p { margin: 0; font: 400 22px/1.38 var(--f-body); }
+.acc .det p b { display: block; font: 700 16px/1.6 var(--f-mono); letter-spacing: .14em; text-transform: uppercase; }
+.acc .det p:first-child b { color: var(--h1); } .acc .det p:last-child b { color: var(--h2); }
+
+/* ---------- 13 · mano ---------- */
+#mano { padding: 0; }
+#mano .lay { position: absolute; inset: 0; }
+#mano .lay img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+#mano .garra { opacity: var(--m, 0); }
+#mano .txt { position: absolute; left: 120px; top: 120px; width: 900px; display: flex; flex-direction: column; gap: 28px; z-index: 6; }
+
+/* ---------- 14 · vitral ---------- */
+.vit { width: 1100px; height: 614px; cursor: crosshair; touch-action: none; }
+.vit img { position: absolute; inset: 0; }
+.vit .dim { filter: brightness(.3) saturate(.5) contrast(1.05); }
+.vit .lit { filter: brightness(1.12) saturate(1.15) contrast(1.05); }
+.vit .lit { -webkit-mask-image: radial-gradient(circle var(--rad, 150px) at var(--lx, 57%) var(--ly, 40%), #000 55%, transparent 100%); mask-image: radial-gradient(circle var(--rad, 150px) at var(--lx, 57%) var(--ly, 40%), #000 55%, transparent 100%); }
+.verse { font: italic 400 30px/1.4 var(--f-display); margin: 0; padding-left: 24px; border-left: 3px solid var(--h1); }
+
+/* ---------- 16 · el orden de las dos historias ---------- */
+.orow { position: relative; width: 1680px; height: 590px; flex: none; }
+.orow .slot { position: absolute; top: 0; font: 700 18px/1 var(--f-mono); letter-spacing: .16em; text-transform: uppercase; color: var(--muted); }
+.orow .arrow { position: absolute; top: 232px; width: 90px; text-align: center; font: 400 54px/1 var(--f-display); color: var(--h1); }
+.scene { position: absolute; top: 56px; width: 500px; display: flex; flex-direction: column; gap: 22px; transition: left .9s cubic-bezier(.65, 0, .35, 1); }
+.scene .media { width: 500px; height: 375px; }
+.scene .media img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: opacity .6s ease; }
+.scene .cap { margin: 0; font: 400 23px/1.38 var(--f-body); }
+.scene .cap b { display: block; font: italic 500 27px/1.2 var(--f-display); margin-bottom: 4px; }
+.scene.fin .cap b { color: var(--h1); transition: color .6s; }
+.orow.inv .scene.fin .cap b { color: var(--h2); }
+.scene .alt { opacity: 0; }
+.orow.inv .scene.fin .alt { opacity: 1; }
+.orow.inv .scene.fin .cap .a, .orow:not(.inv) .scene.fin .cap .b { display: none; }
+
+/* ---------- 17 · cierre ---------- */
+.surface { font: italic 400 50px/1.3 var(--f-display); color: var(--h2); margin: 0; max-width: 1560px; }
+.surface span { display: inline-block; opacity: 0; transform: translateY(70px); transition: opacity .7s ease, transform .9s cubic-bezier(.2, .8, .2, 1); margin-right: .24em; }
+.surface.up span { opacity: 1; transform: none; }
+.line2 { position: relative; height: 26px; width: 1560px; }
+.line2::before, .line2::after { content: ""; position: absolute; left: 0; right: 0; height: 4px; }
+.line2::before { top: 2px; background: var(--h1); }
+.line2::after { top: 18px; background: repeating-linear-gradient(90deg, var(--h2-ink) 0 16px, transparent 16px 26px); }
+
+
+/* índice de láminas */
+.index { position: absolute; inset: 0; z-index: 50; background: rgba(236, 234, 227, .98); padding: 92px 120px 120px; display: flex; flex-direction: column; gap: 34px; }
+.reverso .index { background: rgba(20, 24, 50, .98); }
+.index .ih { display: flex; justify-content: space-between; align-items: center; }
+.index .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px 24px; }
+.index .ix { all: unset; box-sizing: border-box; cursor: pointer; display: grid; grid-template-columns: 50px 1fr; gap: 12px; align-items: baseline; padding: 16px 14px 18px; border-top: 2px solid var(--rule); }
+.index .ix:hover, .index .ix:focus-visible { background: rgba(47, 77, 160, .09); }
+.index .ix:focus-visible { outline: 3px solid var(--h1); outline-offset: 2px; }
+.index .ix .n { font: 700 20px/1 var(--f-mono); color: var(--h1); }
+.index .ix .t { font: 400 26px/1.22 var(--f-display); color: var(--fg); }
+.index .ix.part .t { font-style: italic; color: var(--h2); }
+.index .ix.cur { border-top-color: var(--h2-ink); background: rgba(226, 72, 61, .07); }
+.index .ix.cur .n { color: var(--h2); }
+
+/* aviso de orientación en teléfonos */
+.rotate { position: fixed; inset: 0; z-index: 100; display: grid; place-items: center; background: var(--letterbox); color: #ECEAE3; text-align: center; padding: 24px max(16px, env(safe-area-inset-left, 0px)) 24px max(16px, env(safe-area-inset-right, 0px)); font: 400 18px/1.45 var(--f-body); }
+.rotate div { display: flex; flex-direction: column; gap: 16px; align-items: center; max-width: 320px; }
+.rotate p { margin: 0; }
+.rotate button { font: 700 15px/1 var(--f-mono); letter-spacing: .1em; text-transform: uppercase; border: 2px solid #ECEAE3; color: #ECEAE3; background: none; border-radius: 999px; padding: 12px 18px; cursor: pointer; }
+
+@media (prefers-reduced-motion: reduce) {
+  .slide, .slide.on, .flip .in, .surface span, .nota { transition: none !important; }
+}
+</style>
+</head>
+<body>
+<div class="stage" id="stage" data-tone="image" aria-roledescription="presentación">
+
+  <!-- 1 · PORTADA -->
+  <section class="slide on" id="portada" data-tone="image" data-foot="min" data-word="Hay" aria-label="Lámina 1: portada">
+    <img class="bleed" src="assets/portada.jpg" alt="Ilustración a dos tintas: un hombre de 1900 sale del Casino de Montecarlo con un fajo de billetes; su sombra roja camina en dirección contraria, hacia una casa con una ventana encendida. Título: Un cuento siempre cuenta dos historias. Ricardo Piglia, Tesis sobre el cuento.">
+    <h1 class="sr">Un cuento siempre cuenta dos historias. Ricardo Piglia, «Tesis sobre el cuento».</h1>
+    <div class="veil"></div>
+    <p class="nota" style="left:120px;top:868px;width:640px">La sombra ya camina hacia la casa. Sabe cómo termina antes que el hombre.</p>
+  </section>
+
+  <!-- PORTADILLA I -->
+  <section class="slide portadilla" id="parte1" data-tone="image" aria-label="Primera parte: Tesis sobre el cuento">
+    <img src="assets/portada_parte1_v2.jpg" alt="Primera parte. Tesis sobre el cuento: un cuento siempre cuenta dos historias; lo no dicho, el iceberg; Kafka y Borges; la iluminación profana. A la derecha, una capitular I ornamentada con una brújula, naipes, una llave, fichas, una ruleta y una ola en azul; detrás, en rojo, un reloj, un sobre y la parte sumergida de un iceberg.">
+    <h2 class="sr">Primera parte: Tesis sobre el cuento</h2>
+  </section>
+
+  <!-- 2 · LA ANÉCDOTA -->
+  <section class="slide" id="chejov" data-word="algo" aria-label="La anécdota de Chéjov">
+    <div class="cols" style="grid-template-columns:520px 1fr;gap:64px">
+      <div class="col">
+        <p class="eyebrow">I · La anécdota</p>
+        <p class="anec">«Un hombre, en Montecarlo, <span class="j">va al Casino, gana un millón, vuelve a su casa,</span> <span class="s">se suicida.</span>»</p>
+        <p class="cite">Antón Chéjov, cuaderno de notas</p>
+        <p class="body">Contra lo previsible (jugar, perder, suicidarse), la intriga es una paradoja: <b>separa la historia del juego de la historia del suicidio.</b></p>
+        <p class="body">Un relato visible esconde un relato secreto, narrado de modo elíptico y fragmentario.</p>
+      </div>
+      <div class="col" data-no-swipe>
+        <div class="media lens" id="lens">
+          <img class="h1" src="assets/casino_h1.jpg" alt="El Casino de Montecarlo en 1900: un hombre de frac recoge una montaña de fichas ante la ruleta, rodeado de jugadores sorprendidos.">
+          <img class="h2" src="assets/casino_h2.jpg" alt="La misma escena con los indicios de la otra historia en rojo: un revólver en el bolsillo, una carta de despedida, un reloj detenido y, en el espejo, el hombre solo en un cuarto vacío.">
+          <span class="ring" aria-hidden="true"></span>
+        </div>
+        <div class="row" style="justify-content:space-between;width:1100px">
+          <div class="row"><span class="cite"><span class="k1">■</span> historia 1 · el juego</span><span class="cite"><span class="k2">■</span> historia 2 · el suicidio</span></div>
+          <button class="btn b2" id="btnH2" aria-pressed="false">Ver toda la historia 2</button>
+        </div>
+      </div>
+    </div>
+    <p class="nota" style="left:120px;bottom:150px;width:480px">Todo estaba en la sala. Nadie miró el espejo.</p>
+  </section>
+
+  <!-- 3 · PRIMERA TESIS -->
+  <section class="slide" id="tesis1" data-word="en" aria-label="Lámina 3: primera tesis">
+    <div class="cols" style="grid-template-columns:600px 1fr">
+      <div class="col">
+        <p class="eyebrow">Primera tesis</p>
+        <h2 class="title xl">Un cuento siempre cuenta <em>dos historias.</em></h2>
+        <p class="body">El cuento clásico (Poe, Quiroga) narra en primer plano la <span class="k1">historia 1</span> y construye en secreto la <span class="k2">historia 2</span>. El arte del cuentista está en cifrar la segunda en los intersticios de la primera.</p>
+      </div>
+      <div class="col scrub" id="scrubFichas">
+        <div class="media" style="width:1080px;height:608px">
+          <img class="seq" src="assets/fichas/f00.jpg" alt="Fichas de casino suspendidas; desde arriba, su sombra dibuja un revólver.">
+        </div>
+        <div class="scrubber">
+          <span class="l">historia 1 · el juego</span>
+          <input type="range" id="rFichas" min="0" max="1" step="0.001" value="0" aria-label="Punto de vista: de la historia del juego a la del suicidio">
+          <span class="r">historia 2 · la sombra</span>
+        </div>
+      </div>
+    </div>
+    <p class="nota" style="left:120px;bottom:150px;width:560px">Las fichas no forman nada. Su sombra, sí.</p>
+  </section>
+
+  <!-- 4 · LA MÁQUINA -->
+  <section class="slide" id="maquina" data-word="el" aria-label="Lámina 4: la máquina de las dos historias">
+    <div class="cols" style="grid-template-columns:440px 1180px;gap:48px;align-items:center">
+      <div class="col">
+        <p class="eyebrow">II–III · Dos causalidades</p>
+        <h2 class="title" style="font-size:54px">Los puntos de cruce son el fundamento de la construcción.</h2>
+        <p class="body"><span class="k1">Historia 1:</span> lo que se narra en primer plano.</p>
+        <p class="body"><span class="k2">Historia 2:</span> se cuenta de modo elíptico y fragmentario.</p>
+        <p class="body"><span class="kx">Puntos de cruce:</span> los mismos hechos entran a la vez en dos lógicas narrativas antagónicas. Cada elemento tiene doble función.</p>
+      </div>
+      <div class="media" style="width:1180px;height:700px;background:var(--paper);box-shadow:none" data-no-swipe>
+        <iframe src="assets/maquina.html" title="La máquina de las dos historias" style="width:100%;height:100%;border:0;display:block" loading="lazy"></iframe>
+      </div>
+    </div>
+    <p class="nota" style="left:120px;bottom:150px;width:500px">Cada vuelta de manivela empuja un diente que nadie ve.</p>
+  </section>
+
+  <!-- 5 · SUPERFLUO / BÁSICO -->
+  <section class="slide" id="superfluo" data-word="final" aria-label="Lo superfluo y lo básico">
+    <div class="col" style="height:100%;justify-content:space-between;gap:30px">
+      <div class="col" style="gap:14px">
+        <div class="row" style="justify-content:space-between;align-items:center">
+          <p class="eyebrow">IV · La materia ambigua</p>
+          <button class="btn" id="flipAll">Dar vuelta las tres</button>
+        </div>
+        <h2 class="title" style="font-size:54px">Lo que es superfluo en una historia es básico en la otra.</h2>
+      </div>
+      <div class="cards" data-no-swipe>
+        <button class="flip" aria-pressed="false" aria-label="El libro del tendero: dar vuelta la tarjeta">
+          <span class="in">
+            <span class="face front"><span class="plate"><img class="cimg" src="assets/libro_h1_v2.jpg" alt="Libritos de edición popular apilados en el mostrador de una tienda de barrio."></span><span class="ct"><span class="tag">historia 1 · superfluo</span><h3>El libro del tendero</h3><span class="where">«La muerte y la brújula»</span><span class="t">Un tendero publica una edición popular de la <i>Historia secreta de los Hasidim</i>: parece estar ahí solo por cercanía con el primer crimen.</span></span></span>
+            <span class="face back"><span class="plate"><img class="cimg" src="assets/libro_h2_v2.jpg" alt="El mismo librito abierto: una mano con anillo sostiene páginas con un diagrama cabalístico trazado en rojo."></span><span class="ct"><span class="tag">historia 2 · básico</span><h3>El libro del tendero</h3><span class="where">«La muerte y la brújula»</span><span class="t">Es el manual con que Red Scharlach se instruye en la tradición judía para tenderle a Lönnrot una trampa mística.</span></span></span>
+          </span>
+        </button>
+        <button class="flip" aria-pressed="false" aria-label="Las mil y una noches: dar vuelta la tarjeta">
+          <span class="in">
+            <span class="face front"><span class="plate"><img class="cimg" src="assets/noches_h1_v2.jpg" alt="Un ejemplar antiguo de Las mil y una noches apoyado en una escalera, junto a una ventana recién pintada."></span><span class="ct"><span class="tag">historia 1 · superfluo</span><h3>Las mil y una noches</h3><span class="where">«El Sur»</span><span class="t">Dahlmann consigue un ejemplar incompleto y, por subir apurado a hojearlo, se hiere en la frente: una compra de bibliófilo, un accidente.</span></span></span>
+            <span class="face back"><span class="plate"><img class="cimg" src="assets/noches_h2_v2.jpg" alt="El mismo libro abierto: de sus páginas brota en rojo la llanura del sur y un hombre que sale con un cuchillo."></span><span class="ct"><span class="tag">historia 2 · básico</span><h3>Las mil y una noches</h3><span class="where">«El Sur»</span><span class="t">El libro de los relatos dentro de relatos anuncia que el viaje al Sur puede ser un sueño: la muerte que sueña un hombre en un hospital.</span></span></span>
+          </span>
+        </button>
+        <button class="flip" aria-pressed="false" aria-label="La cicatriz: dar vuelta la tarjeta">
+          <span class="in">
+            <span class="face front"><span class="plate"><img class="cimg" src="assets/cicatriz_h1_v2.jpg" alt="Retrato de perfil de un hombre con poncho y una cicatriz curva en la cara."></span><span class="ct"><span class="tag">historia 1 · superfluo</span><h3>La cicatriz</h3><span class="where">«La forma de la espada»</span><span class="t">Un arco ceniciento atraviesa la cara del Inglés de La Colorada: un rasgo pintoresco que despierta la curiosidad del narrador.</span></span></span>
+            <span class="face back"><span class="plate"><img class="cimg" src="assets/cicatriz_h2_v2.jpg" alt="El mismo hombre con la cicatriz en rojo; a su lado, en rojo, el hombre traicionado que lo marcó con un sable."></span><span class="ct"><span class="tag">historia 2 · básico</span><h3>La cicatriz</h3><span class="where">«La forma de la espada»</span><span class="t">Es la marca de la infamia: el que cuenta la historia del traidor como si fuera ajena es el traidor mismo.</span></span></span>
+          </span>
+        </button>
+      </div>
+    </div>
+    <p class="nota" style="right:120px;top:40px;width:520px">El detalle que parece sobrar es el que sostiene todo.</p>
+  </section>
+
+  <!-- 6 · SEGUNDA TESIS -->
+  <section class="slide" id="tesis2" data-word="que" aria-label="Segunda tesis: la clave">
+    <div class="cols" style="grid-template-columns:440px 1180px;gap:60px">
+      <div class="col">
+        <p class="eyebrow">Segunda tesis</p>
+        <h2 class="title" style="font-size:52px">La historia secreta es la clave de la forma del cuento.</h2>
+        <p class="body">El enigma no es un sentido oculto que depende de la interpretación: es una historia que se cuenta de un modo enigmático.</p>
+        <p class="body"><b>¿Cómo contar una historia mientras se está contando otra?</b></p>
+        <div class="row"><button class="btn b2" id="btnClave" aria-pressed="false">Poner la clave</button></div>
+        <div class="decoded" id="decoded" aria-live="polite"></div>
+      </div>
+      <div class="media desk" id="desk" data-no-swipe>
+        <img src="assets/escritorio.jpg" alt="Escritorio de un escritor visto desde arriba: máquina de escribir, tintero, lámpara, reloj de bolsillo, un naipe y fichas de casino.">
+        <div class="page" id="page"><span class="ph">Montecarlo</span><span class="ln">En el casino nadie mira el reloj. Las lámparas</span><span class="ln">arden sobre el paño y el crupier anuncia cada</span><span class="ln">número sin levantar la voz. <span class="sec">Nadie sabe que el</span></span><span class="ln"><span class="sec">ganador</span> de esta noche apuesta siempre al negro</span><span class="ln">y gana. Recoge las fichas con calma, como quien</span><span class="ln"><span class="sec">ya escribió</span> el final de una partida antigua.</span><span class="ln">Pide una copa, deja propina y guarda en el saco</span><span class="ln"><span class="sec">su carta</span> de crédito y un pañuelo doblado.</span><span class="ln">Afuera la noche tiene el color del mar. Un aire</span><span class="ln"><span class="sec">de despedida</span> tiene su voz al saludar al portero.</span></div>
+        <div class="grille" id="grille" role="img" aria-label="Una tarjeta roja perforada: la clave que, puesta sobre la página, deja leer la otra historia."></div>
+      </div>
+    </div>
+    <p class="nota" style="right:120px;top:40px;width:560px">Las mismas palabras, leídas por los agujeros, cuentan otra cosa.</p>
+  </section>
+
+  <!-- 7 · ICEBERG -->
+  <section class="slide" id="iceberg" data-word="estaba" aria-label="Lámina 7: el iceberg de Hemingway">
+    <div class="cols" style="grid-template-columns:590px 1fr">
+      <div class="col">
+        <p class="eyebrow">VI–VII · Lo no dicho</p>
+        <h2 class="title">Lo más importante nunca se cuenta.</h2>
+        <p class="body">El cuento moderno (Chéjov, Mansfield, Anderson, el Joyce de <i>Dublineses</i>) abandona el final sorpresivo y trabaja la tensión entre las dos historias sin resolverla nunca.</p>
+        <p class="body">En «El gran río de los dos corazones», Hemingway cifra tanto la historia de la guerra que el cuento parece una excursión de pesca. <b>Se nota la ausencia del otro relato.</b></p>
+      </div>
+      <div class="col">
+        <div class="media ice" id="ice">
+          <img src="assets/rio_iceberg.jpg" alt="Corte de un río de montaña: arriba, un joven pesca con calma; bajo el agua, en rojo, trincheras, alambradas y cascos de la Primera Guerra Mundial.">
+          <div class="under"></div>
+          <span class="lab a">historia 1 · una excursión de pesca</span>
+          <span class="lab b">historia 2 · la guerra, nunca nombrada</span>
+        </div>
+        <div class="scrubber" style="width:1080px">
+          <span class="l">superficie</span>
+          <input type="range" id="rIce" min="0" max="1" step="0.01" value="0" aria-label="Sumergirse bajo la línea del agua">
+          <span class="r">lo sumergido</span>
+        </div>
+      </div>
+    </div>
+    <p class="nota" style="left:120px;bottom:150px;width:540px">La guerra no aparece ni una vez. Por eso pesa.</p>
+  </section>
+
+  <!-- LA ANÉCDOTA, OTRA VEZ -->
+  <section class="slide" id="anecdota" aria-label="La anécdota de Chéjov, antes de las variantes">
+    <div class="cols" style="grid-template-columns:880px 1fr;gap:72px">
+      <div class="media" style="width:880px;height:491px"><img src="assets/montecarlo.jpg" alt="Un hombre de 1900 sale del Casino de Montecarlo con un fajo de billetes; su sombra roja camina en dirección contraria, hacia una casa con una ventana encendida."></div>
+      <div class="col" style="gap:30px">
+        <p class="eyebrow">Antes de las variantes</p>
+        <p class="anec" style="font-size:56px">«Un hombre, en Montecarlo, <span class="j">va al Casino, gana un millón, vuelve a su casa,</span> <span class="s">se suicida.</span>»</p>
+        <div class="split">
+          <div><span class="tag k1">Historia 1 · lo visible</span><p>El juego: va al casino, gana un millón y vuelve a su casa.</p></div>
+          <div><span class="tag k2">Historia 2 · lo secreto</span><p>El suicidio: lo que la partida no dice.</p></div>
+        </div>
+        <p class="lead"><b>La misma anécdota, cuatro escritores.</b> ¿Qué historia pone cada uno en la superficie y cuál esconde?</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 8 · VARIANTES -->
+  <section class="slide" id="variantes" data-word="en" aria-label="Cuatro maneras de contar la anécdota">
+    <div class="col" style="height:100%;justify-content:space-between;gap:24px">
+      <div class="row" style="justify-content:space-between;align-items:end">
+        <div class="col" style="gap:20px">
+          <p class="eyebrow">VI–IX · Variantes</p>
+          <h2 class="title">¿Cómo contarían la anécdota de Chéjov?</h2>
+        </div>
+        <div class="tabs" role="tablist" aria-label="Escritores">
+          <button class="btn" role="tab" data-v="poe" aria-selected="true" aria-pressed="true">Poe</button>
+          <button class="btn" role="tab" data-v="hem" aria-selected="false" aria-pressed="false">Hemingway</button>
+          <button class="btn" role="tab" data-v="kaf" aria-selected="false" aria-pressed="false">Kafka</button>
+          <button class="btn" role="tab" data-v="bor" aria-selected="false" aria-pressed="false">Borges</button>
+        </div>
+      </div>
+      <div class="var" role="tabpanel" aria-live="polite">
+        <div class="col">
+          <p class="tagv" id="vTag"></p>
+          <p class="who" id="vWho"></p>
+          <p class="lead" id="vTxt"></p>
+          <p class="small" id="vSee"></p>
+          <div class="legend"><span><span class="k1">■</span> historia 1</span><span><span class="k2">■</span> historia 2</span></div>
+        </div>
+        <div class="media" style="width:1076px;height:600px"><img id="vImg" src="assets/var_poe.jpg" alt=""></div>
+      </div>
+    </div>
+    <p class="nota" style="left:120px;bottom:150px;width:520px">Cambia quién narra. La historia secreta sigue siendo la misma.</p>
+  </section>
+
+  <!-- 9 · BORGES -->
+  <section class="slide" id="borges" data-word="el" aria-label="Borges y la construcción de la historia secreta">
+    <div class="cols" style="grid-template-columns:820px 1fr">
+      <div class="col">
+        <p class="eyebrow">X · Borges</p>
+        <h2 class="title">La construcción de la historia 2 es el tema del relato.</h2>
+        <p class="body">Borges narra las maniobras de alguien que arma, con los materiales de una historia visible, una trama secreta destinada a otro.</p>
+        <div class="row" role="group" aria-label="Pasos de «La muerte y la brújula»">
+          <button class="btn" data-step="1">1 · Los crímenes</button>
+          <button class="btn" data-step="2">2 · La deducción</button>
+          <button class="btn b2" data-step="3">3 · La trama secreta</button>
+        </div>
+        <ul class="who-list">
+          <li>Red Scharlach<span>«La muerte y la brújula»</span></li>
+          <li>Azevedo Bandeira<span>«El muerto»</span></li>
+          <li>James Alexander Nolan<span>«Tema del traidor y del héroe»</span></li>
+          <li>Emma Zunz<span>«Emma Zunz»</span></li>
+        </ul>
+      </div>
+      <div class="col" style="gap:22px;align-items:center" data-no-swipe>
+        <div class="media mapbox" id="mapbox">
+          <img src="assets/mapa.jpg" alt="Plano antiguo de una ciudad imaginaria, con un riachuelo al sur y, más allá, una quinta con jardín y dos torres.">
+          <svg class="mapov" id="mapov" viewBox="0 0 1000 1000" role="img" aria-label="Sobre el plano, tres crímenes forman un triángulo equilátero; Lönnrot deduce un cuarto punto al sur, en la quinta de Triste-le-Roy; Scharlach trazó el rombo con compás.">
+            <g class="g" id="mg3" style="opacity:0"><path class="arc" d="M609.3 739.3 A380.8 380.8 0 0 1 438.6 837.8" stroke-dashoffset="205"/><path class="arc" d="M438.6 102.2 A380.8 380.8 0 0 1 609.3 200.7" stroke-dashoffset="205"/><path class="arc" d="M621.4 837.8 A380.8 380.8 0 0 1 450.7 739.3" stroke-dashoffset="205"/><path class="arc" d="M450.7 200.7 A380.8 380.8 0 0 1 621.4 102.2" stroke-dashoffset="205"/>
+              <circle cx="340" cy="470" r="30" fill="none" stroke="#E2483D" stroke-width="3"/><circle cx="720" cy="470" r="30" fill="none" stroke="#E2483D" stroke-width="3"/>
+            </g>
+            <polygon class="tri" id="tri" points="530,140 340,470 720,470" stroke="#2F4DA0" stroke-dasharray="1150" stroke-dashoffset="1150"/>
+            <polyline class="rhomb" id="rhomb" points="340,470 530,800 720,470" stroke="#2F4DA0" stroke-dasharray="770" stroke-dashoffset="770"/>
+            <g class="g" id="mg1" style="opacity:0">
+              <circle cx="530" cy="140" r="20" fill="#2F4DA0"/><text class="num" x="530" y="148" text-anchor="middle">1</text>
+              <circle cx="340" cy="470" r="20" fill="#2F4DA0"/><text class="num" x="340" y="478" text-anchor="middle">2</text>
+              <circle cx="720" cy="470" r="20" fill="#2F4DA0"/><text class="num" x="720" y="478" text-anchor="middle">3</text>
+              <text class="lbl" x="568" y="150">un crimen</text>
+              <text class="lbl" x="302" y="480" text-anchor="end">otro crimen</text>
+              <text class="lbl" x="758" y="480">otro crimen</text>
+            </g>
+            <g class="g" id="mg2" style="opacity:0">
+              <circle cx="530" cy="800" r="22" fill="#2F4DA0"/><text class="num" x="530" y="808" text-anchor="middle">?</text>
+              <text class="lbl" x="570" y="810">el cuarto punto</text>
+            </g>
+            <g class="g" id="mg4" style="opacity:0">
+              <circle cx="530" cy="800" r="38" fill="none" stroke="#E2483D" stroke-width="5"/>
+              <circle cx="530" cy="800" r="22" fill="#E2483D"/>
+              <text class="lbl" x="580" y="796" style="fill:#B7302A;font-weight:700">Triste-le-Roy</text>
+              <text class="lbl" x="580" y="832" style="fill:#B7302A">lo espera Scharlach</text>
+            </g>
+          </svg>
+        </div>
+        <p class="map-cap" id="mapCap" aria-live="polite"></p>
+      </div>
+    </div>
+    <p class="nota" style="right:120px;top:40px;width:640px">El detective lee bien los signos. Lo que no sabe es que alguien los escribió para él.</p>
+  </section>
+
+  <!-- 10 · ILUMINACIÓN PROFANA -->
+  <section class="slide" id="iluminacion" data-word="origen y" aria-label="La iluminación profana">
+    <div class="cols" style="grid-template-columns:560px 1fr">
+      <div class="col">
+        <p class="eyebrow">XI · La iluminación profana</p>
+        <h2 class="title">El cuento hace aparecer, artificialmente, algo que estaba oculto.</h2>
+        <p class="body">Busca una experiencia única que permita ver, bajo la superficie opaca de la vida, una verdad secreta: no en una tierra lejana, sino en el corazón mismo de lo inmediato (Rimbaud).</p>
+        <p class="cite">«Esa iluminación profana se ha convertido en la forma del cuento.» R. Piglia</p>
+      </div>
+      <div class="col" data-no-swipe>
+        <div class="media reveal" id="reveal">
+          <img src="assets/cuarto_h1.jpg" alt="Un cuarto oscuro de fotografía bañado por la luz roja de seguridad; en la cubeta de revelado, una hoja de papel fotográfico todavía en blanco.">
+          <img class="dev" src="assets/cuarto_h2.jpg" alt="En la hoja de la cubeta ya apareció la fotografía: una calle de barrio al atardecer, un farol, una ventana encendida y un hombre de sombrero cuya sombra roja camina en dirección contraria.">
+        </div>
+        <div class="scrubber" style="width:1080px">
+          <span class="l">la hoja en blanco</span>
+          <input type="range" id="rReveal" min="0" max="1" step="0.01" value="0" aria-label="Revelar la fotografía">
+          <span class="r">lo que estaba oculto</span>
+        </div>
+      </div>
+    </div>
+    <p class="nota" style="left:120px;bottom:150px;width:520px">Lo oculto no está lejos: está en lo inmediato.</p>
+  </section>
+
+  <!-- PORTADILLA II -->
+  <section class="slide portadilla" id="parte2" data-tone="image" aria-label="Segunda parte: Nuevas tesis sobre el cuento">
+    <img src="assets/portada_parte2_v2.jpg" alt="Segunda parte. Nuevas tesis sobre el cuento: el final como cambio de velocidad; el que escucha; la imagen secreta; el que cuenta; dónde concluir. A la derecha, una capitular II ornamentada con un reloj de arena, un pincel, un cangrejo, un vitral, una oreja y dos jinetes en azul; detrás, en rojo, una mariposa, el sol y una mano que se vuelve garra.">
+    <h2 class="sr">Segunda parte: Nuevas tesis sobre el cuento</h2>
+  </section>
+
+  <!-- 11 · EL CANGREJO -->
+  <section class="slide" id="cangrejo" data-word="el" aria-label="Lámina 11: el final como cambio de velocidad">
+    <div class="cols" style="grid-template-columns:600px 1fr">
+      <div class="col">
+        <p class="eyebrow">Nuevas tesis · El final</p>
+        <h2 class="title">El final es, antes que un corte, un cambio de velocidad.</h2>
+        <p class="body">Chuang Tzu pide cinco años para dibujar un cangrejo, y después otros cinco. A los diez, con un solo gesto, dibuja el cangrejo más perfecto que jamás se haya visto (Calvino).</p>
+        <p class="body"><b>¿La espera forma parte de la obra?</b> Kafka contaría la postergación incesante: el cuadro estaría terminado para todos, menos para Chuang Tzu.</p>
+      </div>
+      <div class="col">
+        <div class="media" style="width:1080px;height:608px">
+          <video id="vCangrejo" muted playsinline preload="metadata" poster="assets/cangrejo_poster.jpg" src="assets/cangrejo.mp4" aria-label="Pasan diez años sobre el papel vacío y, en un instante, un pincel dibuja un cangrejo que luego se transforma en pájaro y en mariposa."></video>
+        </div>
+        <div class="row" style="justify-content:flex-end"><button class="btn" id="replayCangrejo">Volver a ver</button></div>
+      </div>
+    </div>
+    <p class="nota" style="left:120px;bottom:150px;width:540px">¿Cuánto tardó, al final, en dibujarlo?</p>
+  </section>
+
+  <!-- 12 · EL OYENTE -->
+  <section class="slide" id="oyente" data-word="arte" aria-label="Lámina 12: el que escucha">
+    <div class="cols" style="grid-template-columns:780px 1fr;align-items:start">
+      <div class="col">
+        <p class="eyebrow">Nuevas tesis · El que escucha</p>
+        <h2 class="title">En el cuento persiste la sombra de aquel que escucha.</h2>
+        <div class="media" style="width:780px;height:435px"><img src="assets/oyente.jpg" alt="Un almacén con espejos altos: un hombre sentado escucha, en azul; un desconocido de pie, en rojo y con el rostro en sombra, le cuenta una historia; los espejos repiten su figura."></div>
+        <p class="small">Un hombre servicial y abstraído escucha, en un almacén de espejos altos, una historia que comprende a medias y que lo implica.</p>
+      </div>
+      <div class="col" style="padding-top:8px">
+        <p class="lead">El relato se dirige a un interlocutor perplejo que va siendo engañado. Al final entiende que la historia que intentaba descifrar era falsa: había otra, secreta, que le estaba destinada.</p>
+        <div class="acc" id="acc">
+          <button aria-expanded="true"><span class="nm">Lönnrot<span>«La muerte y la brújula»</span></span><span class="pl">+</span></button>
+          <div class="det"><p><b>Cree vivir</b>una serie de crímenes que solo él sabe descifrar.</p><p><b>Le estaba destinada</b>la trama que Scharlach construyó para atraparlo.</p></div>
+          <button aria-expanded="false"><span class="nm">Otálora<span>«El muerto»</span></span><span class="pl">+</span></button>
+          <div class="det"><p><b>Cree vivir</b>una aventura que lo exalta y lo ennoblece.</p><p><b>Le estaba destinada</b>la burla de Bandeira, que lo dejó llegar alto para matarlo.</p></div>
+          <button aria-expanded="false"><span class="nm">La ley<span>«Emma Zunz»</span></span><span class="pl">+</span></button>
+          <div class="det"><p><b>Recibe</b>un relato verosímil de ultraje y defensa propia.</p><p><b>Le estaba destinada</b>una venganza tejida con perversa precisión, que nadie más podrá comprender.</p></div>
+          <button aria-expanded="false"><span class="nm">Los patriotas y Ryan<span>«Tema del traidor y del héroe»</span></span><span class="pl">+</span></button>
+          <div class="det"><p><b>Reciben</b>una leyenda heroica.</p><p><b>Les estaba destinada</b>la ficción que Nolan urdió con el azar y con Shakespeare, y que Ryan descifra años después.</p></div>
+        </div>
+        <p class="small">En el fondo, todos somos la tía de Flannery O'Connor: queremos que la historia continúe.</p>
+      </div>
+    </div>
+    <p class="nota" style="right:120px;top:104px;width:520px">Quien escucha también está dentro del cuento.</p>
+  </section>
+
+  <!-- 13 · LA MANO OCULTA -->
+  <section class="slide" id="mano" data-tone="image" data-word="de" aria-label="Lámina 13: la mano oculta">
+    <div class="lay">
+      <img src="assets/mano_oculta.jpg" alt="Un hombre triste y muy cambiado esconde la mano derecha dentro del saco, sobre el corazón.">
+      <img class="garra" src="assets/garra.jpg" alt="El mismo hombre saca la mano: es la garra roja de un pájaro.">
+    </div>
+    <div class="veil"></div>
+    <div class="txt">
+      <p class="eyebrow">Nuevas tesis · La forma secreta</p>
+      <h2 class="title" style="font-size:76px">La forma se condensa en una imagen que prefigura la historia completa.</h2>
+      <p class="body" style="max-width:780px">En un sueño que cuenta Borges, un amigo muy cambiado esconde la mano derecha dentro del saco. Hasta que la saca, el relato es apenas un encuentro triste entre dos amigos. Después, con un gesto, todo cambia.</p>
+      <div class="scrubber" style="width:780px" data-no-swipe>
+        <span class="l">la mano oculta</span>
+        <input type="range" id="rMano" min="0" max="1" step="0.01" value="0" aria-label="Sacar la mano del saco">
+        <span class="r">lo que esconde</span>
+      </div>
+      <div class="row"><button class="btn b2" id="btnMano" aria-pressed="false">Sacar la mano</button></div>
+    </div>
+    <p class="nota" style="left:120px;bottom:150px;width:600px">La garra estuvo en el saco desde la primera línea.</p>
+  </section>
+
+  <!-- 14 · EL NARRADOR -->
+  <section class="slide" id="narrador" data-word="narrar" aria-label="Lámina 14: la irrupción del narrador">
+    <div class="cols" style="grid-template-columns:560px 1fr">
+      <div class="col">
+        <p class="eyebrow">Nuevas tesis · El que cuenta</p>
+        <h2 class="title">Al final irrumpe el que estuvo contando desde el principio.</h2>
+        <p class="body">Todo el <i>Martín Fierro</i> lo narra Fierro. En el cierre surge otra voz, que se queda de este lado de la frontera mientras ellos se van:</p>
+        <p class="verse">no sé si los habrán muerto<br>en alguna correría,<br>pero espero que algún día<br>sabré de ellos algo cierto.</p>
+        <p class="cite">José Hernández, <i>El gaucho Martín Fierro</i> (1872)</p>
+      </div>
+      <div class="col">
+        <div class="media vit" id="vit" data-no-swipe>
+          <img class="dim" src="assets/vitral.jpg" alt="">
+          <img class="lit" src="assets/vitral.jpg" alt="De noche, desde un jardín, un vitral de rombos amarillos, rojos y verdes rajado en diagonal; en un rombo se vislumbra la sombra de un rostro.">
+        </div>
+        <div class="row" style="justify-content:space-between;width:1100px"><p class="small">Hay una fisura en la ventana: en un rombo del vitral se vislumbra la vaga sombra de un rostro.</p><button class="btn" id="btnRostro">Mostrar el rostro</button></div>
+      </div>
+    </div>
+    <p class="nota" style="left:120px;bottom:150px;width:520px">Al final aparece la voz que estuvo contando desde el principio.</p>
+  </section>
+
+  <!-- 15 · LA MARIPOSA -->
+  <section class="slide" id="mariposa" data-word="consiste" aria-label="Lámina 15: el sueño de Chuang Tzu">
+    <div class="cols" style="grid-template-columns:600px 1fr">
+      <div class="col">
+        <p class="eyebrow">Nuevas tesis · ¿Dónde concluir?</p>
+        <h2 class="title" style="font-size:56px">¿Un hombre que soñó ser mariposa, o una mariposa que sueña ser hombre?</h2>
+        <p class="body">Borges habría cambiado el cangrejo por una mariposa: así tendría dos historias. Si Chuang Tzu primero pinta y después sueña, el cuadro anuncia una metamorfosis.</p>
+      </div>
+      <div class="col scrub" id="scrubMariposa">
+        <div class="media" style="width:1080px;height:608px;background:var(--paper)">
+          <img class="seq" src="assets/mariposa/f00.jpg" alt="La cámara gira alrededor de la escultura; en el muro del fondo su sombra es una mariposa, en el muro lateral es un hombre dormido.">
+        </div>
+        <div class="scrubber">
+          <span class="l">la mariposa</span>
+          <input type="range" id="rMariposa" min="0" max="1" step="0.001" value="0" aria-label="Punto de vista: de la mariposa al hombre dormido">
+          <span class="r">el hombre que sueña</span>
+        </div>
+      </div>
+    </div>
+    <p class="nota" style="left:120px;bottom:150px;width:560px">Según de dónde venga la luz, sueña el hombre o sueña la mariposa.</p>
+  </section>
+
+  <!-- 16 · EL ORDEN DE LAS DOS HISTORIAS -->
+  <section class="slide" id="orden" data-word="en" aria-label="¿Qué va primero: el sueño o el cuadro?">
+    <div class="col" style="height:100%;justify-content:space-between;gap:24px">
+      <div class="row" style="justify-content:space-between;align-items:end">
+        <div class="col" style="gap:18px">
+          <p class="eyebrow">Nuevas tesis · Borges reescribe a Chuang Tzu</p>
+          <h2 class="title" style="font-size:56px">¿Qué va primero: el sueño o el cuadro?</h2>
+          <p class="body" style="max-width:1100px">Si cambia el orden de las dos historias, cambia el final. ¿Cuál es la historia secreta? Es decir, ¿dónde concluir?</p>
+        </div>
+        <button class="btn b2" id="btnOrden" aria-pressed="false">Invertir el orden</button>
+      </div>
+      <div class="orow" id="orow" data-no-swipe>
+        <span class="slot" style="left:0">Primero</span>
+        <span class="slot" style="left:590px">Después</span>
+        <span class="slot" style="left:1180px">Desenlace</span>
+        <span class="arrow" style="left:500px" aria-hidden="true">→</span>
+        <span class="arrow" style="left:1090px" aria-hidden="true">→</span>
+        <div class="scene" id="scSueno" style="left:0">
+          <div class="media"><img src="assets/orden_sueno.jpg" alt="Chuang Tzu duerme sobre una estera; sobre él flota en rojo una gran mariposa."></div>
+          <p class="cap"><b>El sueño</b>Chuang Tzu sueña que es una mariposa.</p>
+        </div>
+        <div class="scene" id="scCuadro" style="left:590px">
+          <div class="media"><img src="assets/orden_cuadro.jpg" alt="Chuang Tzu, despierto, pinta con un solo trazo una mariposa sobre papel de arroz."></div>
+          <p class="cap"><b>El cuadro</b>Pinta una mariposa, la más perfecta que jamás se haya visto.</p>
+        </div>
+        <div class="scene fin" style="left:1180px">
+          <div class="media">
+            <img src="assets/orden_fin_a.jpg" alt="De día y en calma, Chuang Tzu contempla el cuadro de la mariposa colgado en la pared.">
+            <img class="alt" src="assets/orden_fin_b.jpg" alt="Al amanecer, Chuang Tzu despierta inquieto; su sombra roja en la pared ya tiene alas de mariposa.">
+          </div>
+          <p class="cap"><b><span class="a">El sueño explica el cuadro</span><span class="b">El cuadro anuncia una mutación</span></b><span class="a">Pinta lo que soñó: la ambigüedad se corta y la historia se cierra.</span><span class="b">Al despertar no sabe si es un hombre que soñó ser mariposa o una mariposa que sueña ser hombre.</span></p>
+        </div>
+      </div>
+    </div>
+    <p class="nota" style="right:120px;top:40px;width:520px">El final ya estaba en el orden.</p>
+  </section>
+
+  <!-- 17 · CIERRE -->
+  <section class="slide" id="cierre" data-word="postergarlo" aria-label="Lámina 17: cierre">
+    <div class="col" style="height:100%;justify-content:center;gap:44px">
+      <p class="eyebrow">Para concluir</p>
+      <h2 class="title" style="font-size:80px;max-width:1600px">Concluir un relato es descubrir el punto de cruce que permite entrar en la otra trama.</h2>
+      <div class="line2" aria-hidden="true"></div>
+      <p class="surface" id="surface" aria-label="Hay algo en el final que estaba en el origen y el arte de narrar consiste en postergarlo."></p>
+    </div>
+  </section>
+
+
+  <!-- pie -->
+  <footer class="foot">
+    <span class="left"><span class="src">Ricardo Piglia · «Tesis sobre el cuento» · <i>Formas breves</i> (2000)</span><span class="frag" id="frag" aria-live="polite"></span></span>
+    <div class="prog" aria-hidden="true"><i class="p0"></i><i class="p1"></i><i class="p2"></i></div>
+    <div class="nav">
+      <button class="ic" id="prev" aria-label="Lámina anterior"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
+      <span class="count" id="count">1 / 17</span>
+      <button class="ic" id="next" aria-label="Lámina siguiente"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></button>
+      <button class="ic" id="idx" aria-label="Índice de láminas (I)" title="Índice de láminas (I)" aria-haspopup="dialog"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><rect x="4" y="4" width="6.5" height="6.5"/><rect x="13.5" y="4" width="6.5" height="6.5"/><rect x="4" y="13.5" width="6.5" height="6.5"/><rect x="13.5" y="13.5" width="6.5" height="6.5"/></svg></button>
+      <button class="ic sec" id="sec" aria-pressed="false" aria-label="Mostrar la historia secreta (S)" title="Historia secreta (S)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M3 9h18"/><path d="M3 15h18" stroke-dasharray="3 3"/></svg></button>
+      <button class="ic" id="fs" aria-label="Pantalla completa (F)" title="Pantalla completa (F)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
+    </div>
+  </footer>
+
+  <div class="index" id="index" hidden role="dialog" aria-modal="true" aria-label="Índice de láminas">
+    <div class="ih"><p class="eyebrow">Índice de láminas</p><button class="btn" id="idxClose">Cerrar</button></div>
+    <div class="grid" id="idxGrid"></div>
+  </div>
+</div>
+
+<div class="rotate" id="rotate" hidden>
+  <div>
+    <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M2 12a10 10 0 0 0 5 8.6M22 12a10 10 0 0 0-5-8.6"/></svg>
+    <p>Esta presentación está hecha para verse en horizontal. Gira el teléfono.</p>
+    <button id="rotateOk">Verla igual</button>
+  </div>
+</div>
+
+<script>
+(() => {
+  const stage = document.getElementById('stage');
+  const slides = [...stage.querySelectorAll('.slide')];
+  const N = slides.length;
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const words = slides.map(s => s.dataset.word).filter(Boolean);
+  let cur = 0;
+
+  /* ---------- escala y orientación ---------- */
+  let rotateDismissed = false;
+  function fit() {
+    const s = Math.min((innerWidth - 32) / 1920, (innerHeight - 32) / 1080);
+    stage.style.setProperty('--s', Math.max(s, .05));
+    document.getElementById('rotate').hidden = rotateDismissed || !(innerWidth < innerHeight && innerWidth < 700);
+  }
+  addEventListener('resize', fit); fit();
+  document.getElementById('rotateOk').onclick = () => { rotateDismissed = true; fit(); };
+
+  /* ---------- navegación ---------- */
+  const hooks = {};
+  function go(i) {
+    i = Math.max(0, Math.min(N - 1, i));
+    if (i === cur) return;
+    const prev = slides[cur];
+    prev.classList.remove('on'); prev.inert = true; prev.setAttribute('aria-hidden', 'true');
+    hooks[prev.id]?.leave?.();
+    cur = i;
+    show();
+  }
+  function show() {
+    const s = slides[cur];
+    s.classList.add('on'); s.inert = false; s.removeAttribute('aria-hidden');
+    stage.dataset.tone = s.dataset.tone || 'paper';
+    stage.dataset.foot = s.dataset.foot || '';
+    document.getElementById('count').textContent = (cur + 1) + ' / ' + N;
+    stage.querySelector('.p1').style.width = ((cur + 1) / N * 100) + '%';
+    const wi = words.indexOf(s.dataset.word);
+    const seen = s.dataset.word ? slides.slice(0, cur + 1).filter(x => x.dataset.word).length : words.length;
+    stage.querySelector('.p2').style.width = (seen / words.length * 100) + '%';
+    document.getElementById('frag').textContent = s.dataset.word ? seen + '/' + words.length + ': «' + s.dataset.word + '»' : 'completa';
+    hooks[s.id]?.enter?.();
+  }
+  slides.forEach((s, i) => { if (i) { s.inert = true; s.setAttribute('aria-hidden', 'true'); } });
+
+  document.getElementById('prev').onclick = () => go(cur - 1);
+  document.getElementById('next').onclick = () => go(cur + 1);
+  const secBtn = document.getElementById('sec');
+  function toggleSecret() {
+    const on = !stage.classList.contains('reverso');
+    stage.classList.toggle('reverso', on);
+    secBtn.setAttribute('aria-pressed', on);
+  }
+  secBtn.onclick = toggleSecret;
+  function fullscreen() {
+    if (document.fullscreenElement) document.exitFullscreen?.().catch(() => {});
+    else document.documentElement.requestFullscreen?.().catch(() => {});
+  }
+  document.getElementById('fs').onclick = fullscreen;
+
+  addEventListener('keydown', e => {
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    const ixEl = document.getElementById('index');
+    if (!ixEl.hidden) {
+      if (e.key === 'Escape' || e.key === 'i' || e.key === 'I') { e.preventDefault(); openIndex(false); }
+      return;
+    }
+    if (e.key === 'i' || e.key === 'I') { e.preventDefault(); openIndex(true); return; }
+    const t = e.target;
+    const inRange = t && t.matches && t.matches('input[type=range]');
+    if (['ArrowRight', 'PageDown'].includes(e.key) && !inRange) { e.preventDefault(); go(cur + 1); }
+    else if (['ArrowLeft', 'PageUp'].includes(e.key) && !inRange) { e.preventDefault(); go(cur - 1); }
+    else if (e.key === ' ' && !(t && t.closest && t.closest('button, input'))) { e.preventDefault(); go(cur + 1); }
+    else if (e.key === 'Home') go(0);
+    else if (e.key === 'End') go(N - 1);
+    else if (e.key === 's' || e.key === 'S') toggleSecret();
+    else if (e.key === 'f' || e.key === 'F') fullscreen();
+  });
+
+  // deslizar con el dedo
+  let sx = null, sy = 0;
+  stage.addEventListener('pointerdown', e => {
+    if (e.pointerType === 'mouse' || e.target.closest('[data-no-swipe], input, button, iframe, .vit')) { sx = null; return; }
+    sx = e.clientX; sy = e.clientY;
+  });
+  stage.addEventListener('pointerup', e => {
+    if (sx === null) return;
+    const dx = e.clientX - sx, dy = e.clientY - sy;
+    if (Math.abs(dx) > 60 && Math.abs(dy) < 80) go(cur + (dx < 0 ? 1 : -1));
+    sx = null;
+  });
+
+  /* ---------- utilidades ---------- */
+  const ease = k => k < .5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;
+  // Barra de punto de vista: recorre una secuencia de imágenes (no depende de que el servidor permita saltar dentro de un video).
+  function scrubber(root, range, base, n) {
+    const img = root.querySelector('img.seq');
+    const src = i => base + 'f' + String(i).padStart(2, '0') + '.jpg';
+    const cache = [];
+    let raf = 0, shown = 0;
+    const preload = () => {
+      if (cache.length) return;
+      for (let i = 0; i < n; i++) { const im = new Image(); im.decoding = 'async'; im.src = src(i); cache.push(im); }
+    };
+    const set = x => {
+      range.value = x;
+      const i = Math.round(x * (n - 1));
+      if (i !== shown) { shown = i; img.src = src(i); }
+    };
+    range.addEventListener('input', () => { cancelAnimationFrame(raf); preload(); set(+range.value); });
+    function to(target, ms = 6000) {
+      cancelAnimationFrame(raf);
+      if (reduce) { set(target); return; }
+      const from = +range.value, t0 = performance.now();
+      const step = t => { const k = Math.min(1, (t - t0) / ms); set(from + (target - from) * ease(k)); if (k < 1) raf = requestAnimationFrame(step); };
+      raf = requestAnimationFrame(step);
+    }
+    const ready = fn => { preload(); Promise.all(cache.map(im => im.decode ? im.decode().catch(() => {}) : 0)).then(fn); };
+    return { to, set, stop: () => cancelAnimationFrame(raf), ready, preload };
+  }
+
+  /* ---------- 2 · la escena del casino ---------- */
+  const lens = document.getElementById('lens'), btnH2 = document.getElementById('btnH2');
+  const CLUES = [[78, 31], [58, 29], [67, 66], [63, 82]];  // espejo, reloj, revólver, carta
+  let lensTour = 0, lensIdle = 0, rafL = 0, ci = 0, lpos = { x: 78, y: 31 };
+  function lensAt(x, y) { lpos = { x, y }; lens.style.setProperty('--lx', x + '%'); lens.style.setProperty('--ly', y + '%'); }
+  function glide(to, ms) {
+    const from = { ...lpos }, t0 = performance.now();
+    cancelAnimationFrame(rafL);
+    const st = t => { const k = Math.min(1, (t - t0) / ms), e = ease(k); lensAt(from.x + (to[0] - from.x) * e, from.y + (to[1] - from.y) * e); if (k < 1) rafL = requestAnimationFrame(st); };
+    rafL = requestAnimationFrame(st);
+  }
+  function tour() { clearInterval(lensTour); if (reduce) return; lensTour = setInterval(() => { ci = (ci + 1) % CLUES.length; glide(CLUES[ci], 1300); }, 2700); }
+  lens.addEventListener('pointermove', e => {
+    clearInterval(lensTour); cancelAnimationFrame(rafL); clearTimeout(lensIdle);
+    const r = lens.getBoundingClientRect();
+    lensAt((e.clientX - r.left) / r.width * 100, (e.clientY - r.top) / r.height * 100);
+    lensIdle = setTimeout(tour, 5000);
+  });
+  btnH2.onclick = () => {
+    const on = !lens.classList.contains('full');
+    lens.classList.toggle('full', on); btnH2.setAttribute('aria-pressed', on);
+    btnH2.textContent = on ? 'Volver a la lupa' : 'Ver toda la historia 2';
+  };
+  hooks.chejov = {
+    enter() { lensAt(78, 31); ci = 0; tour(); },
+    leave() { clearInterval(lensTour); clearTimeout(lensIdle); cancelAnimationFrame(rafL); }
+  };
+
+  /* ---------- 3 · fichas ---------- */
+  const sF = scrubber(document.getElementById('scrubFichas'), document.getElementById('rFichas'), 'assets/fichas/', 60);
+  let tF = 0;
+  hooks.tesis1 = {
+    enter() { sF.stop(); sF.set(0); clearTimeout(tF); sF.ready(() => { if (slides[cur].id === 'tesis1') tF = setTimeout(() => sF.to(1, 6500), 700); }); },
+    leave() { clearTimeout(tF); sF.stop(); }
+  };
+
+  /* ---------- 5 · tarjetas ---------- */
+  const flips = [...document.querySelectorAll('#superfluo .flip')];
+  flips.forEach(f => f.onclick = () => f.setAttribute('aria-pressed', f.getAttribute('aria-pressed') !== 'true'));
+  document.getElementById('flipAll').onclick = () => {
+    const anyFront = flips.some(f => f.getAttribute('aria-pressed') !== 'true');
+    flips.forEach((f, i) => setTimeout(() => f.setAttribute('aria-pressed', anyFront), reduce ? 0 : i * 180));
+  };
+
+  /* ---------- 6 · la clave (rejilla de Cardano) ---------- */
+  const desk = document.getElementById('desk'), pageEl = document.getElementById('page'), grille = document.getElementById('grille');
+  const btnClave = document.getElementById('btnClave'), decoded = document.getElementById('decoded');
+  const REST = { x: 596, y: 150, r: 5 }, HOME = { x: 0, y: 0, r: 0 };
+  let gBuilt = false, gPos = REST, gDrag = null;
+  function buildGrille() {  // la tarjeta tiene el tamaño de la página y un agujero sobre cada palabra secreta
+    if (gBuilt) return; gBuilt = true;
+    const W = pageEl.offsetWidth, H = pageEl.offsetHeight;
+    let d = `M0 0H${W}V${H}H0Z`;
+    pageEl.querySelectorAll('.sec').forEach(sp => {
+      const x = sp.offsetLeft - 5, y = sp.offsetTop - 2, w = sp.offsetWidth + 10, h = sp.offsetHeight + 4;
+      d += `M${x} ${y}h${w}v${h}h${-w}Z`;
+    });
+    grille.innerHTML = `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" aria-hidden="true">
+      <path d="${d}" fill="#E2483D" fill-rule="evenodd"/>
+      <g stroke="#F6F3EA" stroke-width="1.6" fill="none" opacity=".8"><circle cx="22" cy="20" r="7"/><path d="M10 20h24M22 8v24"/></g>
+      <text x="${W - 20}" y="${H - 10}" text-anchor="end" fill="#F6F3EA" font-family="Courier Prime, Courier New, monospace" font-size="15" font-weight="700" letter-spacing="2">CLAVE · HISTORIA 2</text></svg>`;
+  }
+  function placeG(p, anim) {
+    grille.style.transition = anim && !reduce ? 'transform .8s cubic-bezier(.2, .8, .2, 1)' : 'none';
+    grille.style.transform = `translate(${p.x}px, ${p.y}px) rotate(${p.r}deg)`;
+    gPos = p;
+    const on = p.x === 0 && p.y === 0 && p.r === 0;
+    desk.classList.toggle('aligned', on);
+    btnClave.setAttribute('aria-pressed', on);
+    btnClave.textContent = on ? 'Quitar la clave' : 'Poner la clave';
+    decoded.innerHTML = on ? '<p class="msg">«Nadie sabe que el ganador ya escribió su carta de despedida.»</p><p class="why">«Su carta» es de crédito en la historia 1 y de despedida en la historia 2: un mismo elemento con doble función.</p>' : '';
+  }
+  grille.addEventListener('pointerdown', e => {
+    const s = desk.getBoundingClientRect().width / desk.offsetWidth;
+    gDrag = { sx: e.clientX, sy: e.clientY, x0: gPos.x, y0: gPos.y, s };
+    grille.setPointerCapture(e.pointerId);
+  });
+  grille.addEventListener('pointermove', e => {
+    if (!gDrag) return;
+    placeG({ x: gDrag.x0 + (e.clientX - gDrag.sx) / gDrag.s, y: gDrag.y0 + (e.clientY - gDrag.sy) / gDrag.s, r: 0 }, false);
+  });
+  const endDrag = () => { if (!gDrag) return; gDrag = null; if (Math.hypot(gPos.x, gPos.y) < 80) placeG(HOME, true); };
+  grille.addEventListener('pointerup', endDrag);
+  grille.addEventListener('pointercancel', endDrag);
+  btnClave.onclick = () => { buildGrille(); placeG(desk.classList.contains('aligned') ? REST : HOME, true); };
+  hooks.tesis2 = { enter() { (document.fonts ? document.fonts.ready : Promise.resolve()).then(() => { buildGrille(); placeG(REST, false); }); } };
+
+  /* ---------- 7 · iceberg ---------- */
+  const ice = document.getElementById('ice'), rIce = document.getElementById('rIce');
+  rIce.addEventListener('input', () => ice.style.setProperty('--r', rIce.value));
+
+  /* ---------- 8 · variantes ---------- */
+  const VAR = {
+    poe: { who: 'Poe, Quiroga', tag: 'el cuento clásico', img: 'var_poe.jpg', alt: 'Salón de juego gótico a la luz de las velas: el jugador gana en primer plano; al fondo, una puerta entreabierta deja ver en rojo un cuarto vacío con una silla.', see: '<b>En la imagen:</b> el jugador gana en primer plano (historia 1). Al fondo, la puerta entreabierta deja ver el cuarto donde todo terminará (historia 2).', txt: 'Narraría en primer plano la partida y construiría en secreto el suicidio. Al final, la historia secreta sale a la superficie: ese es el efecto de sorpresa.' },
+    hem: { who: 'Hemingway', tag: 'el iceberg', img: 'var_hemingway.jpg', alt: 'Primer plano sobrio de una barra: fichas, un vaso de whisky, un cenicero, un reloj y las manos del jugador; solo la sombra del vaso es roja.', see: '<b>En la imagen:</b> solo la barra, las fichas, el vaso y las manos (historia 1). De la historia 2 queda apenas la sombra roja del vaso.', txt: 'Narraría con detalles precisos la partida, el ambiente, la técnica del jugador y la bebida que toma. Nunca diría que ese hombre se va a suicidar, pero escribiría como si el lector ya lo supiera.' },
+    kaf: { who: 'Kafka', tag: 'la inversión', img: 'var_kafka2.jpg', alt: 'A la izquierda, en rojo y en calma, un hombre escribe una carta en su cuarto; a la derecha, en azul, el casino como una pesadilla: una ruleta con forma de ojo y crupieres sin rostro.', see: '<b>En la imagen:</b> en primer plano y con calma, el hombre escribe su carta (historia 2). Detrás, la partida se vuelve una pesadilla oscura (historia 1).', txt: 'Contaría el suicidio en primer plano y con toda naturalidad. Lo terrible estaría en la partida, narrada de un modo elíptico y amenazador.' },
+    bor: { who: 'Borges', tag: 'el género como disfraz', img: 'var_borges.jpg', alt: 'Un almacén de campo en la llanura: gauchos juegan a las cartas mientras un viejo soldado le cuenta la historia a un forastero; en rojo, un cuchillo clavado en la mesa.', see: '<b>En la imagen:</b> la partida, como relato criollo en un almacén, contada por un viejo soldado (historia 1). En rojo, el cuchillo: la escena única que define un destino (historia 2).', txt: 'Contaría la partida según los estereotipos, levemente parodiados, de un género: un almacén en la llanura entrerriana y un viejo soldado de Urquiza que la recuerda. El suicidio sería una escena única que define un destino.' }
+  };
+  const tabs = [...document.querySelectorAll('#variantes [role=tab]')];
+  const vImg = document.getElementById('vImg');
+  vImg.addEventListener('load', () => { vImg.style.opacity = 1; });
+  Object.values(VAR).forEach(v => { const im = new Image(); im.src = 'assets/' + v.img; });
+  let tV = 0;
+  function setVar(k) {
+    tabs.forEach(t => { const on = t.dataset.v === k; t.setAttribute('aria-selected', on); t.setAttribute('aria-pressed', on); t.tabIndex = on ? 0 : -1; });
+    document.getElementById('vWho').textContent = VAR[k].who;
+    document.getElementById('vTag').textContent = VAR[k].tag;
+    document.getElementById('vTxt').textContent = VAR[k].txt;
+    document.getElementById('vSee').innerHTML = VAR[k].see;
+    vImg.alt = VAR[k].alt;
+    if (vImg.getAttribute('src') === 'assets/' + VAR[k].img) return;
+    clearTimeout(tV);
+    vImg.style.opacity = 0;
+    tV = setTimeout(() => { vImg.src = 'assets/' + VAR[k].img; }, reduce ? 0 : 230);
+  }
+  tabs.forEach(t => t.onclick = () => setVar(t.dataset.v));
+  setVar('poe');
+
+  /* ---------- 9 · Borges ---------- */
+  const tri = document.getElementById('tri'), rh = document.getElementById('rhomb');
+  const mapov = document.getElementById('mapov'), mapbox = document.getElementById('mapbox');
+  const arcs = [...mapov.querySelectorAll('.arc')];
+  const [mg1, mg2, mg3, mg4] = ['mg1', 'mg2', 'mg3', 'mg4'].map(id => document.getElementById(id));
+  const stepBtns = [...document.querySelectorAll('#borges [data-step]')];
+  const mapCap = document.getElementById('mapCap');
+  const CAPS = [
+    'Tres crímenes en tres puntos equidistantes de la ciudad: un triángulo perfecto.',
+    'Tres crímenes en tres puntos equidistantes de la ciudad: un triángulo perfecto.',
+    'Lönnrot completa la figura: deduce un cuarto punto, al sur, del otro lado del riachuelo.',
+    '<span class="k2">Historia 2:</span> Scharlach trazó el rombo con compás para que Lönnrot lo descifrara. En la quinta de Triste-le-Roy lo espera.'
+  ];
+  let carts = false;
+  function cartouches() {  // un cartucho de papel bajo cada etiqueta, para que ninguna línea la cruce
+    if (carts) return; carts = true;
+    mapov.querySelectorAll('text.lbl').forEach(t => {
+      const b = t.getBBox(), r = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+      r.setAttribute('x', b.x - 12); r.setAttribute('y', b.y - 6); r.setAttribute('width', b.width + 24); r.setAttribute('height', b.height + 12);
+      r.setAttribute('rx', 6); r.setAttribute('class', 'cart');
+      t.parentNode.insertBefore(r, t);
+    });
+  }
+  function step(n, instant) {
+    const tr = instant || reduce ? 'none' : 'stroke-dashoffset 1.4s ease, stroke .6s ease';
+    [tri, rh, ...arcs].forEach(el => el.style.transition = tr);
+    tri.style.strokeDashoffset = n >= 1 ? 0 : 1150;
+    rh.style.strokeDashoffset = n >= 2 ? 0 : 770;
+    arcs.forEach(a => a.style.strokeDashoffset = n >= 3 ? 0 : 205);
+    mg1.style.opacity = n >= 1 ? 1 : 0;
+    mg2.style.opacity = n === 2 ? 1 : 0;
+    mg3.style.opacity = n >= 3 ? 1 : 0;
+    mg4.style.opacity = n >= 3 ? 1 : 0;
+    const col = n >= 3 ? '#E2483D' : '#2F4DA0';
+    tri.setAttribute('stroke', col); rh.setAttribute('stroke', col);
+    mapbox.classList.toggle('secret', n >= 3);
+    mapCap.innerHTML = CAPS[n];
+    stepBtns.forEach(b => b.setAttribute('aria-pressed', +b.dataset.step === n));
+  }
+  stepBtns.forEach(b => b.onclick = () => step(+b.dataset.step));
+  step(2, true);
+  let tB = [];
+  hooks.borges = {
+    enter() {
+      (document.fonts ? document.fonts.ready : Promise.resolve()).then(cartouches);
+      if (reduce) return step(2, true);
+      step(0, true); tB = [setTimeout(() => step(1), 400), setTimeout(() => step(2), 2100)];
+    },
+    leave() { tB.forEach(clearTimeout); }
+  };
+
+  /* ---------- 10 · el cuarto oscuro ---------- */
+  const rev = document.getElementById('reveal'), rRev = document.getElementById('rReveal');
+  let rafR = 0, tR = 0;
+  const setR = x => { rev.style.setProperty('--d', x); rRev.value = x; };
+  rRev.addEventListener('input', () => { cancelAnimationFrame(rafR); clearTimeout(tR); setR(+rRev.value); });
+  hooks.iluminacion = {
+    enter() {
+      setR(0); clearTimeout(tR); cancelAnimationFrame(rafR);
+      if (reduce) return;
+      tR = setTimeout(() => { const t0 = performance.now(); const st = t => { const k = Math.min(1, (t - t0) / 5200); setR(ease(k)); if (k < 1) rafR = requestAnimationFrame(st); }; rafR = requestAnimationFrame(st); }, 900);
+    },
+    leave() { clearTimeout(tR); cancelAnimationFrame(rafR); }
+  };
+
+  /* ---------- 11 · cangrejo ---------- */
+  const vC = document.getElementById('vCangrejo');
+  const restart = v => { v.load(); v.play().catch(() => {}); };  // load() vuelve al inicio sin saltar dentro del archivo
+  hooks.cangrejo = { enter() { if (!reduce) restart(vC); }, leave() { vC.pause(); } };
+  document.getElementById('replayCangrejo').onclick = () => restart(vC);
+
+  /* ---------- 12 · oyentes ---------- */
+  const accBtns = [...document.querySelectorAll('#acc > button')];
+  accBtns.forEach(b => b.onclick = () => {
+    const open = b.getAttribute('aria-expanded') !== 'true';
+    accBtns.forEach(x => x.setAttribute('aria-expanded', 'false'));
+    b.setAttribute('aria-expanded', open);
+  });
+
+  /* ---------- 13 · mano ---------- */
+  const mano = document.getElementById('mano'), rM = document.getElementById('rMano'), bM = document.getElementById('btnMano');
+  let rafM = 0;
+  const setM = x => { mano.style.setProperty('--m', x); rM.value = x; bM.setAttribute('aria-pressed', x > .5); bM.textContent = x > .5 ? 'Esconder la mano' : 'Sacar la mano'; };
+  rM.addEventListener('input', () => { cancelAnimationFrame(rafM); setM(+rM.value); });
+  bM.onclick = () => {
+    const to = +rM.value > .5 ? 0 : 1, from = +rM.value, t0 = performance.now();
+    cancelAnimationFrame(rafM);
+    if (reduce) return setM(to);
+    const stepM = t => { const k = Math.min(1, (t - t0) / 1800); setM(from + (to - from) * ease(k)); if (k < 1) rafM = requestAnimationFrame(stepM); };
+    rafM = requestAnimationFrame(stepM);
+  };
+  hooks.mano = { enter() { setM(0); } };
+
+  /* ---------- 14 · vitral ---------- */
+  const vit = document.getElementById('vit');
+  let rafV = 0;
+  function light(x, y, rad) { vit.style.setProperty('--lx', x + '%'); vit.style.setProperty('--ly', y + '%'); if (rad) vit.style.setProperty('--rad', rad + 'px'); }
+  vit.addEventListener('pointermove', e => {
+    cancelAnimationFrame(rafV);
+    const r = vit.getBoundingClientRect();
+    light((e.clientX - r.left) / r.width * 100, (e.clientY - r.top) / r.height * 100, 150);
+  });
+  document.getElementById('btnRostro').onclick = () => {
+    const from = { x: parseFloat(vit.style.getPropertyValue('--lx')) || 30, y: parseFloat(vit.style.getPropertyValue('--ly')) || 40 }, t0 = performance.now();
+    cancelAnimationFrame(rafV);
+    const stepV = t => { const k = Math.min(1, (t - t0) / (reduce ? 1 : 1400)), e = ease(k); light(from.x + (67.5 - from.x) * e, from.y + (51 - from.y) * e, 150 + 60 * e); if (k < 1) rafV = requestAnimationFrame(stepV); };
+    rafV = requestAnimationFrame(stepV);
+  };
+  hooks.narrador = { enter() { light(57, 40, 150); } };
+
+  /* ---------- 15 · mariposa ---------- */
+  const sMa = scrubber(document.getElementById('scrubMariposa'), document.getElementById('rMariposa'), 'assets/mariposa/', 60);
+  let tMa = 0;
+  hooks.mariposa = {
+    enter() { sMa.stop(); sMa.set(0); clearTimeout(tMa); sMa.ready(() => { if (slides[cur].id === 'mariposa') tMa = setTimeout(() => sMa.to(1, 7000), 700); }); },
+    leave() { clearTimeout(tMa); sMa.stop(); }
+  };
+  setTimeout(() => { sF.preload(); sMa.preload(); }, 2500);
+
+  /* ---------- 16 · el orden de las dos historias ---------- */
+  const orow = document.getElementById('orow'), btnOrden = document.getElementById('btnOrden');
+  const scS = document.getElementById('scSueno'), scC = document.getElementById('scCuadro');
+  function orden(inv) {
+    orow.classList.toggle('inv', inv);
+    scS.style.left = inv ? '590px' : '0px';
+    scC.style.left = inv ? '0px' : '590px';
+    btnOrden.setAttribute('aria-pressed', inv);
+    btnOrden.textContent = inv ? 'Volver al orden de Chuang Tzu' : 'Invertir el orden';
+  }
+  btnOrden.onclick = () => orden(!orow.classList.contains('inv'));
+  hooks.orden = { enter() { orden(false); } };
+
+  /* ---------- índice de láminas ---------- */
+  const TITLES = {
+    portada: 'Portada', parte1: 'Primera parte · Tesis sobre el cuento', chejov: 'La anécdota de Chéjov',
+    tesis1: 'Un cuento siempre cuenta dos historias', maquina: 'La máquina de las dos historias', superfluo: 'Lo superfluo y lo básico',
+    tesis2: 'La historia secreta es la clave', iceberg: 'El iceberg de Hemingway', anecdota: 'La anécdota, otra vez',
+    variantes: 'Poe, Hemingway, Kafka, Borges', borges: 'Borges: la trama construida', iluminacion: 'La iluminación profana',
+    parte2: 'Segunda parte · Nuevas tesis', cangrejo: 'El final: un cambio de velocidad', oyente: 'El que escucha',
+    mano: 'La mano oculta', narrador: 'El que cuenta', mariposa: '¿Dónde concluir?', orden: '¿El sueño o el cuadro?', cierre: 'Para concluir'
+  };
+  const idxEl = document.getElementById('index'), idxGrid = document.getElementById('idxGrid'), idxBtn = document.getElementById('idx');
+  idxGrid.innerHTML = slides.map((sl, i) => `<button class="ix${sl.classList.contains('portadilla') ? ' part' : ''}" data-i="${i}"><span class="n">${String(i + 1).padStart(2, '0')}</span><span class="t">${TITLES[sl.id] || sl.getAttribute('aria-label')}</span></button>`).join('');
+  function openIndex(open) {
+    idxEl.hidden = !open;
+    idxBtn.setAttribute('aria-expanded', open);
+    if (open) { [...idxGrid.children].forEach((b, i) => b.classList.toggle('cur', i === cur)); idxGrid.children[cur].focus(); }
+    else idxBtn.focus();
+  }
+  idxGrid.addEventListener('click', e => { const b = e.target.closest('.ix'); if (!b) return; openIndex(false); go(+b.dataset.i); });
+  idxBtn.onclick = () => openIndex(idxEl.hidden);
+  document.getElementById('idxClose').onclick = () => openIndex(false);
+  document.getElementById('count').onclick = () => openIndex(true);
+
+  /* ---------- 17 · cierre ---------- */
+  const surf = document.getElementById('surface');
+  surf.innerHTML = words.map(w => `<span aria-hidden="true">${w}</span>`).join('') ;
+  surf.lastElementChild.textContent += '.';
+  let tS = 0;
+  hooks.cierre = {
+    enter() {
+      surf.classList.remove('up');
+      [...surf.children].forEach((sp, i) => sp.style.transitionDelay = reduce ? '0s' : (0.6 + i * 0.16) + 's');
+      clearTimeout(tS); tS = setTimeout(() => surf.classList.add('up'), 60);
+    },
+    leave() { clearTimeout(tS); surf.classList.remove('up'); }
+  };
+
+  /* ---------- inicio ---------- */
+  const m = location.hash.match(/^#lamina-(\d+)$/);
+  if (m) { const i = Math.min(N, Math.max(1, +m[1])) - 1; if (i) { slides[0].classList.remove('on'); slides[0].inert = true; slides[0].setAttribute('aria-hidden', 'true'); cur = i; } }
+  show();
+  addEventListener('hashchange', () => { const h = location.hash.match(/^#lamina-(\d+)$/); if (h) go(+h[1] - 1); });
+})();
+</script>
+</body>
+</html>
